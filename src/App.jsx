@@ -6,6 +6,7 @@ import DataFileManager from './components/DataFileManager';
 import BacktestRunner from './components/BacktestRunner';
 import BacktestHistory from './components/BacktestHistory';
 import StockDataViewer from './components/StockDataViewer';
+import Backtest from './components/Backtest';
 
 const sections = [
   { 
@@ -13,6 +14,12 @@ const sections = [
     icon: <i className="fas fa-tachometer-alt"></i>, 
     component: <Dashboard />,
     description: 'Overview and quick actions'
+  },
+  {
+    label: 'Backtest',
+    icon: <i className="fas fa-flask"></i>,
+    component: <Backtest />,
+    description: 'Build and run custom backtests'
   },
   { 
     label: 'Data Files', 
@@ -63,6 +70,8 @@ function App() {
     });
     console.log('App.jsx - Backtests data:', backtests);
   }, [strategies, dataFiles, backtests, activity, loading, selected]);
+
+  // Removed aria-hidden check as it's now handled in the select component
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -146,9 +155,7 @@ function App() {
               </span>
               <div className="flex-1 text-left">
                 <div className="font-medium">{section.label}</div>
-                <div className={`text-xs ${selected === index ? 'text-blue-100' : 'text-gray-400'}`}>
-                  {section.description}
-                </div>
+                <div className={`text-xs ${selected === index ? 'text-blue-100' : 'text-gray-400'}`}>{section.description}</div>
               </div>
             </button>
           ))}
@@ -191,7 +198,7 @@ function App() {
             </button>
           </div>
         </div>
-        </div>
+        </div> {/* end overflow-auto sidebar-scroll */}
       </aside>
 
       {/* Overlay for mobile */}
@@ -206,14 +213,12 @@ function App() {
           <button className="sm:hidden mr-3 p-2 rounded-lg hover:bg-gray-100" onClick={handleDrawerToggle}>
             <i className="fas fa-bars text-gray-600"></i>
           </button>
-          
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 flex-1">
             <h1 className="text-lg font-semibold text-gray-800">{sections[selected].label}</h1>
             <span className="text-gray-400">•</span>
             <span className="text-sm text-gray-500">{sections[selected].description}</span>
           </div>
-
           {/* Quick Actions */}
           <div className="flex items-center gap-2">
             {selected === 0 && (
@@ -245,20 +250,20 @@ function App() {
 
         {/* Main content area */}
         <main className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 bg-gray-50">
-            {loading && selected === 4 ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <div className="text-gray-600">Loading backtest results...</div>
-                </div>
+          {loading && selected === 4 ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <div className="text-gray-600">Loading backtest results...</div>
               </div>
+            </div>
+          ) : (
+            selected === 0 ? (
+              <Dashboard onNavigate={handleNavigate} />
             ) : (
-              selected === 0 ? (
-                <Dashboard onNavigate={handleNavigate} />
-              ) : (
-                sections[selected].component
-              )
-            )}
+              sections[selected].component
+            )
+          )}
         </main>
       </div>
     </div>

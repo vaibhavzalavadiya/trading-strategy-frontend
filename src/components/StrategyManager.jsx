@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useAppData } from '../context/AppDataContext';
+import { Input } from './ui/input';
+import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from './ui/table';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
 
 const StrategyManager = () => {
   const { strategies, addStrategy, deleteStrategy, updateStrategy, refreshAllData } = useAppData();
@@ -162,13 +165,13 @@ const StrategyManager = () => {
                 <div className="text-gray-500">Drag and drop your Python strategy script here, or click to select</div>
               )}
             </div>
-            <input
+            <Input
               type="text"
               placeholder="Strategy Name"
               value={name}
               onChange={e => setName(e.target.value)}
               required
-              className="border border-gray-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full text-sm"
             />
             <button
               type="submit"
@@ -197,30 +200,30 @@ const StrategyManager = () => {
           </div>
           <hr className="mb-4" />
           <div className="overflow-x-auto flex-1">
-            <table className="min-w-full text-sm">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-4 py-2 text-left">Name</th>
-                  <th className="px-4 py-2 text-left">Uploaded</th>
-                  <th className="px-4 py-2 text-right">Size</th>
-                  <th className="px-4 py-2 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Uploaded</TableHead>
+                  <TableHead className="text-right">Size</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {currentStrategies.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="text-center text-gray-400 py-6">No strategies uploaded yet</td>
-                  </tr>
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-gray-400 py-6">No strategies uploaded yet</TableCell>
+                  </TableRow>
                 ) : (
                   currentStrategies.map((strategy) => (
-                    <tr key={strategy.id}>
-                      <td className="px-4 py-2 flex items-center gap-2">
+                    <TableRow key={strategy.id}>
+                      <TableCell className="flex items-center gap-2">
                         <span className="text-blue-500"><i className="fas fa-scroll"></i></span>
                         {strategy.name}
-                      </td>
-                      <td className="px-4 py-2">{new Date(strategy.uploaded_at).toLocaleString()}</td>
-                      <td className="px-4 py-2 text-right">{strategy.file_size}</td>
-                      <td className="px-4 py-2 text-right">
+                      </TableCell>
+                      <TableCell>{new Date(strategy.uploaded_at).toLocaleString()}</TableCell>
+                      <TableCell className="text-right">{strategy.file_size}</TableCell>
+                      <TableCell className="text-right">
                         <button
                           className="p-1 rounded hover:bg-blue-100 text-blue-600 mr-2"
                           onClick={() => handleEdit(strategy)}
@@ -235,12 +238,12 @@ const StrategyManager = () => {
                         >
                           <i className="fas fa-trash"></i>
                         </button>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
             {/* Pagination Controls */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between bg-white rounded-lg shadow p-4 mt-6">
@@ -324,12 +327,12 @@ const StrategyManager = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Strategy Name
                 </label>
-                <input
+                <Input
                   type="text"
                   value={editName}
                   onChange={e => setEditName(e.target.value)}
                   required
-                  className="border border-gray-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full text-sm"
                 />
               </div>
               <div>

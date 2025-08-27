@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAppData } from '../context/AppDataContext';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from './ui/table';
+import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
+import { Tag } from './ui/tag';
+import { Button } from './ui/button';
 
 const Dashboard = ({ onNavigate }) => {
   const { dataFiles, strategies, backtests, activity, refreshBacktests } = useAppData();
@@ -103,108 +108,122 @@ const Dashboard = ({ onNavigate }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header with Status */}
-      <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-lg p-6 text-white relative overflow-hidden shadow-lg">
-        <div className="absolute inset-0 bg-black opacity-10"></div>
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-4">
+      <Card className="bg-white">
+        <CardHeader>
+          <CardTitle className="text-3xl font-bold mb-2">Trading Strategy Dashboard</CardTitle>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-2">
             <div>
-              <h1 className="text-3xl font-bold mb-2">Trading Strategy Dashboard</h1>
-              <p className="text-blue-100 text-lg">Monitor your trading performance and strategy analytics</p>
+              <p className="text-muted-foreground text-lg">Monitor your trading performance and strategy analytics</p>
             </div>
-            <div className="flex items-center gap-4">
-              <div className={`px-4 py-2 rounded-full ${statusIndicator.bg} ${statusIndicator.color} font-semibold shadow`} title={statusIndicator.status} aria-label={statusIndicator.status}>
-                {statusIndicator.status}
-              </div>
-              <button
+            <div className="flex items-center gap-4 mt-4 sm:mt-0">
+              <Tag className={`px-4 py-2 font-semibold shadow ${statusIndicator.bg} ${statusIndicator.color}`}>{statusIndicator.status}</Tag>
+              <Button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="bg-white bg-opacity-20 hover:bg-opacity-30 p-3 rounded-lg transition-all duration-200 shadow"
+                className="bg-muted hover:bg-accent text-foreground"
                 aria-label="Refresh Backtests"
                 title="Refresh Backtests"
               >
                 {isRefreshing ? (
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                  <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
                 ) : (
                   <i className="fas fa-sync-alt"></i>
                 )}
-              </button>
+              </Button>
             </div>
           </div>
-
-          {/* Quick Stats Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 mb-8">
-            <div className="flex flex-col items-center justify-center bg-white bg-opacity-90 rounded-lg p-6 shadow-md border border-gray-100 min-h-[120px]">
-              <div className="flex items-center gap-2 mb-2">
+        </CardHeader>
+      </Card>
+      {/* Stats Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+        <Card className="bg-white">
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <div className="flex items-center gap-2 mb-2 mt-2">
                 <i className="fas fa-scroll text-blue-500 text-xl"></i>
                 <span className="text-3xl font-bold text-gray-800">{stats.totalStrategies}</span>
-              </div>
-              <div className="text-blue-700 text-sm font-medium">Strategies</div>
             </div>
-            <div className="flex flex-col items-center justify-center bg-white bg-opacity-90 rounded-lg p-6 shadow-md border border-gray-100 min-h-[120px]">
-              <div className="flex items-center gap-2 mb-2">
+            <div className="text-blue-700 text-sm font-medium mt-2">Strategies</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white">
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <div className="flex items-center gap-2 mb-2 mt-2">
                 <i className="fas fa-database text-green-500 text-xl"></i>
                 <span className="text-3xl font-bold text-gray-800">{stats.totalDataFiles}</span>
-              </div>
-              <div className="text-green-700 text-sm font-medium">Data Files</div>
             </div>
-            <div className="flex flex-col items-center justify-center bg-white bg-opacity-90 rounded-lg p-6 shadow-md border border-gray-100 min-h-[120px]">
-              <div className="flex items-center gap-2 mb-2">
+            <div className="text-green-700 text-sm font-medium mt-2">Data Files</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white">
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <div className="flex items-center gap-2 mb-2 mt-2">
                 <i className="fas fa-history text-purple-500 text-xl"></i>
                 <span className="text-3xl font-bold text-gray-800">{stats.totalBacktests}</span>
-              </div>
-              <div className="text-purple-700 text-sm font-medium">Backtests</div>
             </div>
-            <div className="flex flex-col items-center justify-center bg-white bg-opacity-90 rounded-lg p-6 shadow-md border border-gray-100 min-h-[120px]">
-              <div className="flex items-center gap-2 mb-2">
+            <div className="text-purple-700 text-sm font-medium mt-2">Backtests</div>
+          </CardContent>
+        </Card>
+        <Card className="bg-white">
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <div className="flex items-center gap-2 mb-2 mt-2">
                 <i className="fas fa-percentage text-yellow-500 text-xl"></i>
                 <span className="text-3xl font-bold text-gray-800">{stats.successRate}%</span>
-              </div>
-              <div className="text-yellow-700 text-sm font-medium">Success Rate</div>
             </div>
-          </div>
-        </div>
+            <div className="text-yellow-700 text-sm font-medium mt-2">Success Rate</div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Modern Responsive Card Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
         {/* Performance Overview */}
-        <div className="bg-white rounded-lg shadow-lg border border-gray-100 p-8 flex flex-col col-span-2">
-          <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
+        <Card className="col-span-2 bg-white">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
             <i className="fas fa-chart-line text-blue-600"></i>
             Performance Overview
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 xxl:gap-8 gap-4">
-            <div className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow border border-green-100 min-h-[120px]">
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="flex flex-col items-center justify-center p-6 bg-white border min-h-[120px]">
               <i className="fas fa-rupee-sign text-green-500 text-2xl mb-2"></i>
-              <div className="text-2xl font-bold text-green-600">₹{stats.totalProfit.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-green-600">
+                  ₹{stats.totalProfit.toLocaleString()}
+                </div>
               <div className="text-sm text-green-700 font-medium">Total Profit</div>
               <div className="text-xs text-green-600 mt-1">All Time</div>
+              </Card>
+              <Card className="flex flex-col items-center justify-center p-6 bg-white border min-h-[120px]">
+                <i className="fas fa-chart-bar text-blue-500 text-2xl mb-2"></i>
+                <div className="text-2xl font-bold text-blue-600">
+                  ₹{stats.avgProfit.toLocaleString()}
             </div>
-            <div className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow border border-blue-100 min-h-[120px]">
-              <i className="fas fa-chart-bar text-blue-500 text-2xl mb-2"></i>
-              <div className="text-2xl font-bold text-blue-600">₹{stats.avgProfit.toLocaleString()}</div>
               <div className="text-sm text-blue-700 font-medium">Avg Profit</div>
               <div className="text-xs text-blue-600 mt-1">Per Backtest</div>
-            </div>
-            <div className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg shadow border border-purple-100 min-h-[120px]">
+              </Card>
+              <Card className="flex flex-col items-center justify-center p-6 bg-white border min-h-[120px]">
               <i className="fas fa-trophy text-purple-500 text-2xl mb-2"></i>
               <div className="text-2xl font-bold text-purple-600">{stats.successRate}%</div>
               <div className="text-sm text-purple-700 font-medium">Win Rate</div>
               <div className="text-xs text-purple-600 mt-1">Profitable Trades</div>
+              </Card>
             </div>
-          </div>
-        </div>
-
+          </CardContent>
+        </Card>
         {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow-lg border border-gray-100 p-8 flex flex-col col-span-1">
-          <h2 className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
+        <Card className="col-span-1 bg-white">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
             <i className="fas fa-bolt text-green-600"></i>
             Quick Actions
-          </h2>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
           <div className="space-y-4">
-            <button
+              <Button
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors shadow"
               onClick={() => onNavigate && onNavigate('Data Files')}
               aria-label="Upload Data File"
@@ -212,8 +231,8 @@ const Dashboard = ({ onNavigate }) => {
             >
               <i className="fas fa-upload mr-2"></i>
               Upload Data File
-            </button>
-            <button
+              </Button>
+              <Button
               className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg font-medium transition-colors shadow"
               onClick={() => onNavigate && onNavigate('Strategies')}
               aria-label="Create Strategy"
@@ -221,8 +240,8 @@ const Dashboard = ({ onNavigate }) => {
             >
               <i className="fas fa-scroll mr-2"></i>
               Create Strategy
-            </button>
-            <button
+              </Button>
+              <Button
               className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors shadow"
               onClick={() => onNavigate && onNavigate('Run Backtest')}
               aria-label="Run Backtest"
@@ -230,40 +249,40 @@ const Dashboard = ({ onNavigate }) => {
             >
               <i className="fas fa-play mr-2"></i>
               Run Backtest
-            </button>
+              </Button>
           </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
 
         {/* Top Performing Strategies */}
-        <div className="bg-white rounded-lg shadow-lg border border-gray-100 p-8 flex flex-col">
-          <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
+        <Card className="bg-white">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
             <i className="fas fa-trophy text-yellow-600"></i>
             Top Performing Strategies
-          </h2>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
           {stats.strategyPerformance.length > 0 ? (
             <div className="space-y-4">
               {stats.strategyPerformance.map((strategy, index) => (
-                <div key={strategy.name} className={`flex items-center justify-between p-4 rounded-lg shadow border ${index === 0 ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-100'}`}>
+                  <Card key={strategy.name} className={`flex items-center justify-between p-4 shadow border ${index === 0 ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-100'}`}>
                   <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 ${index === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 'bg-gradient-to-r from-gray-300 to-gray-400'} rounded-full flex items-center justify-center text-white font-bold text-lg shadow`}>
-                      {index + 1}
-                    </div>
+                      <Tag className={`w-10 h-10 flex items-center justify-center text-white font-bold text-lg shadow ${index === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 'bg-gradient-to-r from-gray-300 to-gray-400'}`}>{index + 1}</Tag>
                     <div>
                       <div className="font-semibold text-gray-800 text-lg">{strategy.name}</div>
                       <div className="text-sm text-gray-500">{strategy.backtestCount} backtests</div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className={`font-bold ${getProfitColor(strategy.totalProfit)} text-lg`}>
-                      ₹{strategy.totalProfit.toLocaleString()}
+                      <span className={`font-bold ${getProfitColor(strategy.totalProfit)} text-lg`}><Tag>₹{strategy.totalProfit.toLocaleString()}</Tag></span>
+                      <div className="text-sm text-gray-500">
+                        Avg: <Tag>₹{strategy.avgProfit.toLocaleString()}</Tag>
                     </div>
-                    <div className="text-sm text-gray-500">
-                      Avg: ₹{strategy.avgProfit.toLocaleString()}
                     </div>
-                  </div>
-                </div>
+                  </Card>
               ))}
             </div>
           ) : (
@@ -273,19 +292,23 @@ const Dashboard = ({ onNavigate }) => {
               <div className="text-sm mt-2">Run some backtests to see performance data</div>
             </div>
           )}
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Recent Activity */}
-        <div className="bg-white rounded-lg shadow-lg border border-gray-100 p-8 flex flex-col">
-          <h2 className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
+        <Card className="bg-white">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
             <i className="fas fa-clock text-blue-600"></i>
             Recent Activity
-          </h2>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
           <div className="space-y-4">
             {stats.recentActivity.length > 0 ? (
               stats.recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg shadow border border-gray-100">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
+                  <Card key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg shadow border border-gray-100">
+                    <Tag className="w-2 h-2 bg-blue-600 rounded-full mt-2 p-0"></Tag>
                   <div className="flex-1">
                     <div className="text-sm font-medium text-gray-800 flex items-center gap-2">
                       <i className="fas fa-bolt text-blue-400"></i>
@@ -294,7 +317,7 @@ const Dashboard = ({ onNavigate }) => {
                     <div className="text-xs text-gray-500">{activity.item}</div>
                     <div className="text-xs text-gray-400 mt-1">{activity.time}</div>
                   </div>
-                </div>
+                  </Card>
               ))
             ) : (
               <div className="text-center py-4 text-gray-500">
@@ -302,74 +325,72 @@ const Dashboard = ({ onNavigate }) => {
               </div>
             )}
           </div>
-        </div>
+          </CardContent>
+        </Card>
 
       </div>
 
       {/* Recent Backtests Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mt-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
               <i className="fas fa-history text-blue-600"></i>
               Recent Backtests
             </h2>
-            <select
-              value={selectedTimeframe}
-              onChange={(e) => setSelectedTimeframe(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm ml-2"
-              aria-label="Select Timeframe"
-              title="Filter by timeframe"
-            >
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-              <option value="all">All time</option>
-            </select>
+            <Select value={selectedTimeframe} onValueChange={value => setSelectedTimeframe(value)}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Select Timeframe" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7d">Last 7 days</SelectItem>
+                <SelectItem value="30d">Last 30 days</SelectItem>
+                <SelectItem value="all">All time</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="flex items-center gap-2">
             <label htmlFor="pageSize" className="text-sm text-gray-600">Rows per page:</label>
-            <select
-              id="pageSize"
-              value={pageSize}
-              onChange={handlePageSizeChange}
-              className="border border-gray-300 rounded-lg px-2 py-1 text-sm"
-              aria-label="Rows per page"
-              title="Rows per page"
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-            </select>
+            <Select value={pageSize.toString()} onValueChange={value => { setPageSize(Number(value)); setCurrentPage(1); }}>
+              <SelectTrigger className="w-[100px]">
+                <SelectValue placeholder="Rows per page" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <div className="overflow-x-auto max-h-[60vh]">
-          <table className="min-w-full border-separate border-spacing-y-1">
-            <thead className="bg-gray-50 sticky top-0 z-10">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Strategy</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data File</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trades</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Profit/Loss</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Win Rate</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Strategy</TableHead>
+                <TableHead>Data File</TableHead>
+                <TableHead>Trades</TableHead>
+                <TableHead>Profit/Loss</TableHead>
+                <TableHead>Win Rate</TableHead>
+                <TableHead>Date</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {currentBacktests.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="text-center py-12">
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-12">
                     <div className="text-gray-500">
                       <i className="fas fa-chart-bar text-4xl mb-4 text-gray-300 block"></i>
                       <div className="text-lg font-medium mb-2">No backtests yet</div>
                       <div className="text-sm">Run your first backtest to see results here</div>
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ) : (
                 currentBacktests.map((backtest, idx) => (
-                  <tr key={backtest.id} className="hover:bg-blue-50 transition-colors group focus-within:bg-blue-100">
-                    <td className="px-4 py-4 whitespace-nowrap">
+                  <TableRow key={backtest.id} className="hover:bg-blue-50 transition-colors group focus-within:bg-blue-100">
+                    <TableCell>
                       <div className="flex items-center">
                         <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
                           <i className="fas fa-scroll text-blue-600 text-sm" title="Strategy"></i>
@@ -378,23 +399,23 @@ const Dashboard = ({ onNavigate }) => {
                           <div className="text-sm font-medium text-gray-900">{backtest.strategy}</div>
                         </div>
                       </div>
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
+                    </TableCell>
+                    <TableCell>
                       <div className="text-sm text-gray-500" title={backtest.datafile}>{backtest.datafile}</div>
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
+                    </TableCell>
+                    <TableCell>
                       <div className="text-sm font-medium text-gray-900">
                         {backtest.result?.summary?.total_trades || 0}
                       </div>
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
+                    </TableCell>
+                    <TableCell>
                       <span className={`text-sm font-bold ${getProfitColor(backtest.result?.summary?.total_profit || 0)}`} title="Total Profit/Loss">
                         {backtest.result?.summary?.total_profit !== undefined
                           ? `₹${backtest.result.summary.total_profit.toLocaleString()}`
                           : '--'}
                       </span>
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
+                    </TableCell>
+                    <TableCell>
                       <div className="flex items-center">
                         <div className="text-sm font-medium text-gray-900 mr-2">
                           {backtest.result?.summary?.win_rate || 0}%
@@ -406,15 +427,15 @@ const Dashboard = ({ onNavigate }) => {
                           ></div>
                         </div>
                       </div>
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                    </TableCell>
+                    <TableCell className="text-sm text-gray-500">
                       {new Date(backtest.created_at).toLocaleDateString()}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
         {/* Pagination Controls */}
         {totalPages > 1 && (

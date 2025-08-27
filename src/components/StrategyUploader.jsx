@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
 
 const StrategyUploader = () => {
   const [file, setFile] = useState(null);
@@ -104,19 +105,20 @@ const StrategyUploader = () => {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Timeframe</label>
-            <select
-              value={timeframe}
-              onChange={(e) => setTimeframe(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            >
-              <option value="1m">1 Minute</option>
-              <option value="5m">5 Minutes</option>
-              <option value="15m">15 Minutes</option>
-              <option value="30m">30 Minutes</option>
-              <option value="1h">1 Hour</option>
-              <option value="4h">4 Hours</option>
-              <option value="1d">1 Day</option>
-            </select>
+            <Select value={timeframe} onValueChange={setTimeframe}>
+              <SelectTrigger className="mt-1 w-full">
+                <SelectValue placeholder="Select Timeframe" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1m">1 Minute</SelectItem>
+                <SelectItem value="5m">5 Minutes</SelectItem>
+                <SelectItem value="15m">15 Minutes</SelectItem>
+                <SelectItem value="30m">30 Minutes</SelectItem>
+                <SelectItem value="1h">1 Hour</SelectItem>
+                <SelectItem value="4h">4 Hours</SelectItem>
+                <SelectItem value="1d">1 Day</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div>

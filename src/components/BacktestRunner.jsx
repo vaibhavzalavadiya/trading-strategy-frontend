@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import StrategyManager from './StrategyManager';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
+import { Button } from './ui/button';
 
 const BacktestRunner = () => {
   const { strategies, dataFiles, addBacktest, refreshAllData } = useAppData();
@@ -120,20 +122,20 @@ const BacktestRunner = () => {
     const currentTrades = safeResults.trades.slice(tradeStartIndex, tradeEndIndex);
     
     return (
-      <div className="bg-white rounded-lg shadow p-6 mt-4">
-        <div className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <i className="fas fa-chart-bar"></i>
-          <span>Backtest Results</span>
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="flex items-center gap-2 mb-6">
+          <i className="fas fa-chart-line text-gray-500"></i>
+          <h2 className="text-lg font-semibold text-gray-900">Results</h2>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           {Object.entries(safeResults.summary).map(([key, value]) => (
-            <div key={key} className="bg-gray-50 rounded-lg p-4 flex flex-col items-center">
-              <div className="text-xs text-gray-500 capitalize">{key.replace(/_/g, ' ')}</div>
-              <div className="text-lg font-semibold mt-1">{value}</div>
+            <div key={key} className="bg-gray-50 rounded-lg p-4">
+              <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">{key.replace(/_/g, ' ')}</div>
+              <div className="text-2xl font-bold text-gray-900 mt-1">{value}</div>
             </div>
           ))}
         </div>
-        <div className="overflow-x-auto thin-scrollbar bg-white rounded-lg shadow mb-4">
+        <div className="overflow-x-auto bg-white rounded-lg border border-gray-200 mb-4">
           <table className="min-w-full text-sm">
             <thead className="bg-gray-100">
               <tr>
@@ -228,36 +230,59 @@ const BacktestRunner = () => {
   };
 
   return (
-    <div className="container mx-auto">
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2 text-xl font-semibold">
-            <i className="fas fa-play"></i>
-            <span>Backtest Runner</span>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">Backtest</h1>
+            <p className="text-gray-600 mt-1">Build and run custom backtests</p>
           </div>
           <button
-            className="p-2 rounded hover:bg-blue-100 text-blue-600"
             onClick={handleRefresh}
             disabled={refreshing}
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
             title="Refresh data"
           >
-            {refreshing ? <i className="fas fa-sync-alt animate-spin"></i> : <i className="fas fa-sync-alt"></i>}
+            <i className={`fas ${refreshing ? 'fa-spinner fa-spin' : 'fa-sync-alt'} text-sm`}></i>
           </button>
         </div>
+      </div>
+
+      {/* Configuration */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-6">Configuration</h2>
+        
         {error && (
-          <div className="bg-red-100 text-red-700 rounded p-3 mb-4">{error}</div>
+          <div className="bg-red-50 border border-red-200 text-red-700 rounded-md p-4 mb-6">
+            <div className="flex items-center gap-2">
+              <i className="fas fa-exclamation-circle"></i>
+              <span className="font-medium">Error</span>
+            </div>
+            <div className="mt-2 text-sm whitespace-pre-wrap">{error}</div>
+          </div>
         )}
+        
         {success && (
-          <div className="bg-green-100 text-green-700 rounded p-3 mb-4">{success}</div>
+          <div className="bg-green-50 border border-green-200 text-green-700 rounded-md p-4 mb-6">
+            <div className="flex items-center gap-2">
+              <i className="fas fa-check-circle"></i>
+              <span className="font-medium">Success</span>
+            </div>
+            <div className="mt-2 text-sm">{success}</div>
+          </div>
         )}
-        <div className="flex flex-col md:flex-row gap-8">
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Strategy Selection */}
-          <div className="flex-1">
-            <div className="mb-2 text-sm font-medium">1. Select Python Strategy</div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              1. Select Strategy
+            </label>
             <select
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={selectedStrategy}
-              onChange={e => setSelectedStrategy(e.target.value)}
+              value={selectedStrategy || ''}
+              onChange={(e) => setSelectedStrategy(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
             >
               <option value="">-- Select Strategy --</option>
               {strategies.map(s => (
@@ -265,18 +290,21 @@ const BacktestRunner = () => {
               ))}
             </select>
             {strategies.length === 0 && (
-              <div className="text-xs text-gray-400 mt-2">
-                No strategies uploaded yet. Please upload one first.
-              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                No strategies available. Upload a strategy first.
+              </p>
             )}
           </div>
+          
           {/* Data File Selection */}
-          <div className="flex-1">
-            <div className="mb-2 text-sm font-medium">2. Select Market Data</div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              2. Select Market Data
+            </label>
             <select
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={selectedDataFile}
-              onChange={e => setSelectedDataFile(e.target.value)}
+              value={selectedDataFile || ''}
+              onChange={(e) => setSelectedDataFile(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
             >
               <option value="">-- Select Data File --</option>
               {dataFiles.map(f => (
@@ -284,21 +312,41 @@ const BacktestRunner = () => {
               ))}
             </select>
             {dataFiles.length === 0 && (
-              <div className="text-xs text-gray-400 mt-2">
-                No data files uploaded yet. Please upload one first.
-              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                No data files available. Upload market data first.
+              </p>
             )}
           </div>
         </div>
-        <button
-          className={`w-full mt-6 py-2 rounded bg-blue-600 text-white font-semibold transition ${loading || !selectedStrategy || !selectedDataFile ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
-          onClick={runBacktest}
-          disabled={loading || !selectedStrategy || !selectedDataFile}
-        >
-          {loading ? 'Running Backtest...' : 'Run Backtest'}
-        </button>
-        {renderResults()}
+        
+        {/* Run Button */}
+        <div className="mt-6">
+          <button
+            onClick={runBacktest}
+            disabled={loading || !selectedStrategy || !selectedDataFile}
+            className={`w-full py-3 px-4 rounded-md font-medium transition-colors ${
+              loading || !selectedStrategy || !selectedDataFile
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-gray-900 hover:bg-gray-800 text-white'
+            }`}
+          >
+            {loading ? (
+              <>
+                <i className="fas fa-spinner fa-spin mr-2"></i>
+                Running Backtest...
+              </>
+            ) : (
+              <>
+                <i className="fas fa-play mr-2"></i>
+                Run Backtest
+              </>
+            )}
+          </button>
+        </div>
       </div>
+      
+      {/* Results */}
+      {renderResults()}
     </div>
   );
 };

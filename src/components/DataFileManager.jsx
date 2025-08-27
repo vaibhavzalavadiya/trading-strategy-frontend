@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useAppData } from '../context/AppDataContext';
+import { Input } from './ui/input';
+import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from './ui/table';
 
 const DataFileManager = () => {
   const { dataFiles, addDataFile, deleteDataFile, updateDataFile, refreshAllData } = useAppData();
@@ -191,34 +193,34 @@ const DataFileManager = () => {
               <div className="mb-2">
                 <div className="text-xs font-semibold mb-1">Data Preview ({previewData.totalRows} rows)</div>
                 <div className="overflow-x-auto bg-white rounded border border-gray-200">
-                  <table className="min-w-full text-xs">
-                    <thead className="bg-gray-100">
-                      <tr>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
                         {previewData.headers.slice(0, 5).map((header, i) => (
-                          <th key={i} className="px-2 py-1 text-left">{header}</th>
+                          <TableHead key={i} className="px-2 py-1 text-left">{header}</TableHead>
                         ))}
-                      </tr>
-                    </thead>
-                    <tbody>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                       {previewData.rows.map((row, rowIndex) => (
-                        <tr key={rowIndex}>
+                        <TableRow key={rowIndex}>
                           {previewData.headers.slice(0, 5).map((header, cellIndex) => (
-                            <td key={cellIndex} className="px-2 py-1">{row[header]}</td>
+                            <TableCell key={cellIndex} className="px-2 py-1">{row[header]}</TableCell>
                           ))}
-                        </tr>
+                        </TableRow>
                       ))}
-                    </tbody>
-                  </table>
+                    </TableBody>
+                  </Table>
                 </div>
               </div>
             )}
-            <input
+            <Input
               type="text"
               placeholder="Data File Name"
               value={name}
               onChange={e => setName(e.target.value)}
               required
-              className="border border-gray-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full text-sm"
             />
             <button
               type="submit"
@@ -247,32 +249,32 @@ const DataFileManager = () => {
           </div>
           <hr className="mb-4" />
           <div className="overflow-x-auto flex-1">
-            <table className="min-w-full text-sm">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-4 py-2 text-left">Name</th>
-                  <th className="px-4 py-2 text-left">Uploaded</th>
-                  <th className="px-4 py-2 text-right">Size</th>
-                  <th className="px-4 py-2 text-right">Rows</th>
-                  <th className="px-4 py-2 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Uploaded</TableHead>
+                  <TableHead className="text-right">Size</TableHead>
+                  <TableHead className="text-right">Rows</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {currentDataFiles.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="text-center text-gray-400 py-6">No data files uploaded yet</td>
-                  </tr>
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-gray-400 py-6">No data files uploaded yet</TableCell>
+                  </TableRow>
                 ) : (
                   currentDataFiles.map((datafile) => (
-                    <tr key={datafile.id}>
-                      <td className="px-4 py-2 flex items-center gap-2">
+                    <TableRow key={datafile.id}>
+                      <TableCell className="flex items-center gap-2">
                         <span className="text-blue-500"><i className="fas fa-folder"></i></span>
                         {datafile.name}
-                      </td>
-                      <td className="px-4 py-2">{new Date(datafile.uploaded_at).toLocaleString()}</td>
-                      <td className="px-4 py-2 text-right">{datafile.file_size}</td>
-                      <td className="px-4 py-2 text-right">{datafile.rows ? datafile.rows.toLocaleString() : '-'}</td>
-                      <td className="px-4 py-2 text-right">
+                      </TableCell>
+                      <TableCell>{new Date(datafile.uploaded_at).toLocaleString()}</TableCell>
+                      <TableCell className="text-right">{datafile.file_size}</TableCell>
+                      <TableCell className="text-right">{datafile.rows ? datafile.rows.toLocaleString() : '-'}</TableCell>
+                      <TableCell className="text-right">
                         <button
                           className="p-1 rounded hover:bg-blue-100 text-blue-600 mr-2"
                           onClick={() => handleEdit(datafile)}
@@ -287,12 +289,12 @@ const DataFileManager = () => {
                         >
                           <i className="fas fa-trash"></i>
                         </button>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
             {/* Pagination Controls */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between bg-white rounded-lg shadow p-4 mt-6">
@@ -376,12 +378,12 @@ const DataFileManager = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   File Name
                 </label>
-                <input
+                <Input
                   type="text"
                   value={editName}
                   onChange={e => setEditName(e.target.value)}
                   required
-                  className="border border-gray-300 rounded px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full text-sm"
                 />
               </div>
               <div>

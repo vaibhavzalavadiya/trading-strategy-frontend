@@ -17,33 +17,48 @@ export const AppDataProvider = ({ children }) => {
   const refreshAllData = async () => {
     setLoading(true);
     try {
-      console.log('🔄 Refreshing all data...');
-      const [dfRes, stRes, btRes] = await Promise.all([
-        fetch(`${API_BASE}/list-datafiles/`).then(r => r.json()),
-        fetch(`${API_BASE}/list-strategies/`).then(r => r.json()),
-        fetch(`${API_BASE}/list-backtest-results/`).then(r => r.json()),
-      ]);
-      console.log('📋 Fetched strategies:', stRes);
-      setDataFiles(dfRes);
-      setStrategies(stRes);
+      // Fetch data sequentially to avoid overwhelming the server
+      const dfRes = await fetch(`${API_BASE}/list-datafiles/`).then(r => r.ok ? r.json() : []).catch(() => []);
+      await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
+      
+      const stRes = await fetch(`${API_BASE}/list-strategies/`).then(r => r.ok ? r.json() : []).catch(() => []);
+      await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
+      
+      const btRes = await fetch(`${API_BASE}/list-backtest-results/`).then(r => r.ok ? r.json() : []).catch(() => []);
+      
+      setDataFiles(dfRes || []);
+      setStrategies(stRes || []);
+      
       // Handle both old format (array) and new format (paginated object)
       if (Array.isArray(btRes)) {
         setBacktests(btRes);
-      } else if (btRes.results) {
+      } else if (btRes && btRes.results) {
         setBacktests(btRes.results);
       } else {
         setBacktests([]);
       }
+      
       // Build activity log from latest actions
       const acts = [];
-      dfRes.forEach(f => acts.push({ action: 'Data file added', item: f.name, time: new Date(f.uploaded_at).toLocaleString() }));
-      stRes.forEach(s => acts.push({ action: 'Strategy uploaded', item: s.name, time: new Date(s.uploaded_at).toLocaleString() }));
-      const backtestData = Array.isArray(btRes) ? btRes : (btRes.results || []);
-      backtestData.forEach(b => acts.push({ action: 'Backtest completed', item: b.strategy, time: new Date(b.created_at).toLocaleString() }));
+      if (dfRes && Array.isArray(dfRes)) {
+        dfRes.forEach(f => acts.push({ action: 'Data file added', item: f.name, time: new Date(f.uploaded_at).toLocaleString() }));
+      }
+      if (stRes && Array.isArray(stRes)) {
+        stRes.forEach(s => acts.push({ action: 'Strategy uploaded', item: s.name, time: new Date(s.uploaded_at).toLocaleString() }));
+      }
+      const backtestData = Array.isArray(btRes) ? btRes : (btRes && btRes.results ? btRes.results : []);
+      if (Array.isArray(backtestData)) {
+        backtestData.forEach(b => acts.push({ action: 'Backtest completed', item: b.strategy, time: new Date(b.created_at).toLocaleString() }));
+      }
       acts.sort((a, b) => new Date(b.time) - new Date(a.time));
       setActivity(acts);
     } catch (e) {
       console.error('💥 Error refreshing data:', e);
+      // Set empty arrays as fallback
+      setDataFiles([]);
+      setStrategies([]);
+      setBacktests([]);
+      setActivity([]);
     }
     setLoading(false);
   };
@@ -170,11 +185,11 @@ export const AppDataProvider = ({ children }) => {
   const updateDataFile = async (id, { name, file }) => {
     try {
       const formData = new FormData();
-      if (name) formData.append('name', name);
+      formData.append('name', name); // Always send name
       if (file) formData.append('file', file);
       
       const res = await fetch(`${API_BASE}/update-datafile/${id}/`, {
-        method: 'PUT',
+        method: 'POST',
         body: formData,
       });
       
@@ -193,11 +208,11 @@ export const AppDataProvider = ({ children }) => {
     try {
       console.log('🔄 Updating strategy:', { id, name, hasFile: !!file });
       const formData = new FormData();
-      if (name) formData.append('name', name);
+      formData.append('name', name); // Always send name
       if (file) formData.append('script', file);
       
       const res = await fetch(`${API_BASE}/update-strategy/${id}/`, {
-        method: 'PUT',
+        method: 'POST',
         body: formData,
       });
       
@@ -236,3 +251,4 @@ export const AppDataProvider = ({ children }) => {
     </AppDataContext.Provider>
   );
 }; 
+

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useAppData } from '../context/AppDataContext';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from './ui/table';
 
 export default function StockDataViewer() {
   const { strategies } = useAppData();
@@ -10,50 +12,41 @@ export default function StockDataViewer() {
   const [error, setError] = useState('');
 
   const backendBaseURL = import.meta.env.DEV
-  ? 'http://localhost:8000'
-  : ''; // production relative path
+    ? 'http://localhost:8000'
+    : '';
 
-const fetchCompatibleStocks = async () => {
-  if (!selectedStrategy) return;
-
-  setLoading(true);
-  setError('');
-  setCompatibleStocks([]);
-  setErrorCount(0);
-
-  try {
-    const res = await fetch(
-      `${backendBaseURL}/api/compatible-stocks/?strategy_id=${selectedStrategy}`
-    );
-
-    const contentType = res.headers.get('content-type') || '';
-    let data;
-
-    if (contentType.includes('application/json')) {
-      data = await res.json();
-    } else {
-      const text = await res.text();
-      setError(`Expected JSON but got: ${text}`);
-      setLoading(false);
-      return;
+  const fetchCompatibleStocks = async () => {
+    if (!selectedStrategy) return;
+    setLoading(true);
+    setError('');
+    setCompatibleStocks([]);
+    setErrorCount(0);
+    try {
+      const res = await fetch(
+        `${backendBaseURL}/api/compatible-stocks/?strategy_id=${selectedStrategy}`
+      );
+      const contentType = res.headers.get('content-type') || '';
+      let data;
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        setError(`Expected JSON but got: ${text}`);
+        setLoading(false);
+        return;
+      }
+      if (res.ok && data.status === 'ok') {
+        setCompatibleStocks(data.compatible_stocks || []);
+        setErrorCount(data.error_count || 0);
+      } else {
+        setError(data.error || `Server error: ${res.status}`);
+      }
+    } catch (e) {
+      console.error('Fetch error:', e);
+      setError('Failed to fetch compatible stocks. Please check your network or backend logs.');
     }
-
-    if (res.ok && data.status === 'ok') {
-      setCompatibleStocks(data.compatible_stocks || []);
-      setErrorCount(data.error_count || 0);
-    } else {
-      setError(data.error || `Server error: ${res.status}`);
-    }
-
-  } catch (e) {
-    console.error('Fetch error:', e);
-    setError('Failed to fetch compatible stocks. Please check your network or backend logs.');
-  }
-
-  setLoading(false);
-};
-
-  
+    setLoading(false);
+  };
 
   return (
     <div className="p-6">
@@ -61,11 +54,19 @@ const fetchCompatibleStocks = async () => {
       <div className="flex flex-wrap gap-4 mb-4 items-end">
         <div>
           <label className="block text-sm font-medium mb-1">Strategy</label>
-          <select value={selectedStrategy} onChange={e => setSelectedStrategy(e.target.value)}>
-  <option value="">Select Strategy</option>
-  {strategies.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-</select>
-
+          <div style={{ width: 200 }}>
+            <Select value={selectedStrategy || "__none__"} onValueChange={v => setSelectedStrategy(v === "__none__" ? '' : v)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Strategy" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">Select Strategy</SelectItem>
+                {strategies.map(s => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <button onClick={fetchCompatibleStocks} className="bg-blue-600 text-white px-4 py-2 rounded h-10" disabled={!selectedStrategy || loading}>
           {loading ? 'Checking...' : 'Show Compatible Stocks'}
@@ -75,20 +76,20 @@ const fetchCompatibleStocks = async () => {
       {error && <div className="text-red-600 mb-2">{error}</div>}
       {compatibleStocks.length > 0 && (
         <div className="overflow-x-auto border rounded">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr>
-                <th className="border px-2 py-1 bg-gray-100">Stock Symbol</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Stock Symbol</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {compatibleStocks.map((symbol, i) => (
-                <tr key={symbol} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="border px-2 py-1">{symbol}</td>
-                </tr>
+                <TableRow key={symbol} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                  <TableCell>{symbol}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
       {compatibleStocks.length === 0 && !loading && selectedStrategy && !error && (

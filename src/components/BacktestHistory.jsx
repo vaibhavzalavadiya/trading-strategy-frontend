@@ -1,25 +1,112 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAppData } from '../context/AppDataContext';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from './ui/table';
 
 const BacktestHistory = () => {
-  const { backtests, deleteBacktest, refreshBacktests } = useAppData();
+  const { backtests, deleteBacktest, refreshBacktests, strategies, dataFiles } = useAppData();
   const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
   const [tradePages, setTradePages] = useState({});
   const tradePageSize = 10;
+  
+  // Filter states
+  const [filters, setFilters] = useState({
+    strategy: 'all',
+    dataFile: 'all',
+    profitability: 'all',
+    dateRange: 'all',
+    sortBy: 'date',
+    sortOrder: 'desc'
+  });
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // Debug: Log backtests data
-  useEffect(() => {
-    console.log('BacktestHistory - backtests data:', backtests);
-  }, [backtests]);
+  // Filter and sort backtests
+  const filteredBacktests = useMemo(() => {
+    let filtered = [...backtests];
+    
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(bt => 
+        bt.strategy.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        bt.datafile.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Strategy filter
+    if (filters.strategy !== 'all') {
+      filtered = filtered.filter(bt => bt.strategy === filters.strategy);
+    }
+    
+    // Data file filter
+    if (filters.dataFile !== 'all') {
+      filtered = filtered.filter(bt => bt.datafile === filters.dataFile);
+    }
+    
+    // Profitability filter
+    if (filters.profitability !== 'all') {
+      filtered = filtered.filter(bt => {
+        const profit = bt.result?.summary?.total_profit || 0;
+        if (filters.profitability === 'profitable') return profit > 0;
+        if (filters.profitability === 'loss') return profit < 0;
+        return true;
+      });
+    }
+    
+    // Date range filter
+    if (filters.dateRange !== 'all') {
+      const now = new Date();
+      const cutoff = new Date();
+      if (filters.dateRange === '7d') cutoff.setDate(now.getDate() - 7);
+      else if (filters.dateRange === '30d') cutoff.setDate(now.getDate() - 30);
+      else if (filters.dateRange === '90d') cutoff.setDate(now.getDate() - 90);
+      
+      if (filters.dateRange !== 'all') {
+        filtered = filtered.filter(bt => new Date(bt.created_at) >= cutoff);
+      }
+    }
+    
+    // Sort
+    filtered.sort((a, b) => {
+      let aVal, bVal;
+      
+      switch (filters.sortBy) {
+        case 'strategy':
+          aVal = a.strategy;
+          bVal = b.strategy;
+          break;
+        case 'profit':
+          aVal = a.result?.summary?.total_profit || 0;
+          bVal = b.result?.summary?.total_profit || 0;
+          break;
+        case 'trades':
+          aVal = a.result?.summary?.total_trades || 0;
+          bVal = b.result?.summary?.total_trades || 0;
+          break;
+        default:
+          aVal = new Date(a.created_at);
+          bVal = new Date(b.created_at);
+      }
+      
+      if (filters.sortOrder === 'asc') {
+        return aVal > bVal ? 1 : -1;
+      } else {
+        return aVal < bVal ? 1 : -1;
+      }
+    });
+    
+    return filtered;
+  }, [backtests, filters, searchTerm]);
+  
+  // Get unique values for filters
+  const uniqueStrategies = [...new Set(backtests.map(bt => bt.strategy))];
+  const uniqueDataFiles = [...new Set(backtests.map(bt => bt.datafile))];
 
   // Calculate pagination
-  const totalPages = Math.ceil(backtests.length / pageSize);
+  const totalPages = Math.ceil(filteredBacktests.length / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  const currentBacktests = backtests.slice(startIndex, endIndex);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -68,36 +155,36 @@ const BacktestHistory = () => {
     const currentTrades = trades.slice(tradeStartIndex, tradeEndIndex);
     return (
       <div className="overflow-x-auto thin-scrollbar bg-white rounded-lg shadow mb-4">
-        <table className="min-w-full text-sm">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-4 py-2 text-left">Date</th>
-              <th className="px-4 py-2 text-left">Type</th>
-              <th className="px-4 py-2 text-right">Price ({currencySymbol})</th>
-              <th className="px-4 py-2 text-right">Shares</th>
-              <th className="px-4 py-2 text-right">Profit/Loss ({currencySymbol})</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead className="text-right">Price ({currencySymbol})</TableHead>
+              <TableHead className="text-right">Shares</TableHead>
+              <TableHead className="text-right">Profit/Loss ({currencySymbol})</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {currentTrades.map((trade, index) => (
-              <tr key={index} className={trade.profit > 0 ? 'bg-green-50' : trade.profit < 0 ? 'bg-red-50' : ''}>
-                <td className="px-4 py-2">{trade.date || '-'}</td>
-                <td className="px-4 py-2">
+              <TableRow key={index} className={trade.profit > 0 ? 'bg-green-50' : trade.profit < 0 ? 'bg-red-50' : ''}>
+                <TableCell>{trade.date || '-'}</TableCell>
+                <TableCell>
                   <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${trade.type === 'BUY' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>{trade.type || '-'}</span>
-                </td>
-                <td className="px-4 py-2 text-right">{typeof trade.price === 'number' ? trade.price.toLocaleString() : trade.price || '-'}</td>
-                <td className="px-4 py-2 text-right">{typeof trade.shares === 'number' ? trade.shares.toLocaleString() : trade.shares || '-'}</td>
-                <td className="px-4 py-2 text-right font-medium">
+                </TableCell>
+                <TableCell className="text-right">{typeof trade.price === 'number' ? trade.price.toLocaleString() : trade.price || '-'}</TableCell>
+                <TableCell className="text-right">{typeof trade.shares === 'number' ? trade.shares.toLocaleString() : trade.shares || '-'}</TableCell>
+                <TableCell className="text-right font-medium">
                   {trade.profit !== null && trade.profit !== undefined ? (
                     <span className={trade.profit > 0 ? 'text-green-600' : 'text-red-600'}>
                       {trade.profit > 0 ? '+' : ''}{typeof trade.profit === 'number' ? trade.profit.toLocaleString() : trade.profit}
                     </span>
                   ) : '-'}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
         {/* Pagination Controls for Trades */}
         {totalTradePages > 1 && (
           <div className="flex items-center justify-between bg-white rounded-lg shadow p-4 mt-6">
@@ -166,7 +253,7 @@ const BacktestHistory = () => {
     return (
       <div className="flex items-center justify-between bg-white rounded-lg shadow p-4 mt-6">
         <div className="text-sm text-gray-700">
-          Showing {startIndex + 1}-{Math.min(endIndex, backtests.length)} of {backtests.length} results
+          Showing {startIndex + 1}-{Math.min(endIndex, filteredBacktests.length)} of {filteredBacktests.length} results
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -226,37 +313,160 @@ const BacktestHistory = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="bg-white rounded-lg shadow p-6 mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xl font-semibold">
-          <i className="fas fa-chart-bar"></i>
-          <span>Backtest History</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="text-sm text-gray-500">
-            {backtests.length} backtest{backtests.length !== 1 ? 's' : ''} completed
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Header */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">Backtest Results</h1>
+            <p className="text-gray-600 mt-1">
+              {filteredBacktests.length} of {backtests.length} results
+            </p>
           </div>
           <button
             onClick={refreshBacktests}
-            className="text-sm text-blue-600 hover:text-blue-800"
-            title="Refresh backtest history"
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+            title="Refresh results"
           >
-            <i className="fas fa-sync-alt"></i>
+            <i className="fas fa-sync-alt text-sm"></i>
+          </button>
+        </div>
+      </div>
+      
+      {/* Filters */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <i className="fas fa-filter text-gray-500"></i>
+          <h2 className="text-lg font-medium text-gray-900">Filters</h2>
+        </div>
+        
+        {/* Search */}
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search strategies or data files..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+          />
+        </div>
+        
+        {/* Filter Controls */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Strategy</label>
+            <select
+              value={filters.strategy}
+              onChange={(e) => setFilters(prev => ({ ...prev, strategy: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            >
+              <option value="all">All Strategies</option>
+              {uniqueStrategies.map(strategy => (
+                <option key={strategy} value={strategy}>{strategy}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Data File</label>
+            <select
+              value={filters.dataFile}
+              onChange={(e) => setFilters(prev => ({ ...prev, dataFile: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            >
+              <option value="all">All Data Files</option>
+              {uniqueDataFiles.map(dataFile => (
+                <option key={dataFile} value={dataFile}>{dataFile}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Profitability</label>
+            <select
+              value={filters.profitability}
+              onChange={(e) => setFilters(prev => ({ ...prev, profitability: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            >
+              <option value="all">All Results</option>
+              <option value="profitable">Profitable Only</option>
+              <option value="loss">Loss Only</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Date Range</label>
+            <select
+              value={filters.dateRange}
+              onChange={(e) => setFilters(prev => ({ ...prev, dateRange: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            >
+              <option value="all">All Time</option>
+              <option value="7d">Last 7 Days</option>
+              <option value="30d">Last 30 Days</option>
+              <option value="90d">Last 90 Days</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Sort By</label>
+            <select
+              value={filters.sortBy}
+              onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            >
+              <option value="date">Date</option>
+              <option value="strategy">Strategy</option>
+              <option value="profit">Profit</option>
+              <option value="trades">Trades</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Order</label>
+            <select
+              value={filters.sortOrder}
+              onChange={(e) => setFilters(prev => ({ ...prev, sortOrder: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            >
+              <option value="desc">Descending</option>
+              <option value="asc">Ascending</option>
+            </select>
+          </div>
+        </div>
+        
+        {/* Clear Filters */}
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={() => {
+              setFilters({
+                strategy: 'all',
+                dataFile: 'all',
+                profitability: 'all',
+                dateRange: 'all',
+                sortBy: 'date',
+                sortOrder: 'desc'
+              });
+              setSearchTerm('');
+            }}
+            className="text-sm text-gray-600 hover:text-gray-900 font-medium"
+          >
+            Clear All Filters
           </button>
         </div>
       </div>
       {error && (
         <div className="bg-red-100 text-red-700 rounded p-3 mb-4">{error}</div>
       )}
-      {backtests.length === 0 ? (
+      {filteredBacktests.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
           <i className="fas fa-chart-bar text-4xl mb-4 text-gray-300"></i>
           <div className="text-lg font-medium mb-2">No backtest results found</div>
           <div className="text-sm">Run your first backtest to see results here</div>
         </div>
       ) : (
-        <div className="space-y-8">
-          {currentBacktests.map((result) => {
+        <div className="space-y-6">
+          {filteredBacktests.slice(startIndex, endIndex).map((result) => {
             const tradePage = tradePages[result.id] || 1;
             const setTradePage = (page) => setTradePages((prev) => ({ ...prev, [result.id]: page }));
             return (
