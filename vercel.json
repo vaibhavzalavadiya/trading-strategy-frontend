@@ -6,6 +6,6 @@
   "routes": [
     { "src": "/(.*)", "dest": "/index.html" }
   ],
-  "installCommand": "pnpm install --shamefully-hoist",
-  "buildCommand": "ROLLUP_SKIP_NODEJS_NATIVE=true pnpm run vercel-build"
+  "installCommand": "npm ci --include=optional",
+  "buildCommand": "npm run vercel-build"
 }
