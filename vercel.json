@@ -17,5 +17,7 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ]
+  ],
+  "functions": {},
+  "installCommand": "npm ci"
 }
