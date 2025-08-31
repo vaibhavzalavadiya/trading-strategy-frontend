@@ -8,14 +8,15 @@ export default defineConfig({
       '@': '/src'
     }
   },
-  optimizeDeps: {
-    include: ['axios', '@mui/icons-material']
-  },
   build: {
+    outDir: 'dist',
+    sourcemap: false,
     rollupOptions: {
-      external: [],
       output: {
-        manualChunks: undefined
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          mui: ['@mui/material', '@mui/icons-material']
+        }
       }
     }
   }
