@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import FilterBuilder from './FilterBuilder/FilterBuilder';
+import { apiCall } from '../config/api';
 
 const defaultCondition = () => ({
   left: 'Close',
@@ -49,7 +50,7 @@ const Backtest = () => {
     setError(null);
     
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/get-datafile-data/${dataFileId}/`);
+      const response = await apiCall(`/api/get-datafile-data/${dataFileId}/`);
       if (!response.ok) throw new Error('Failed to load stock data');
       
       const data = await response.json();
