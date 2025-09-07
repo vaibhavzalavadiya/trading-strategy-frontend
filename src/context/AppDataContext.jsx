@@ -17,15 +17,45 @@ export const AppDataProvider = ({ children }) => {
   // Comprehensive refresh function that fetches all data
   const refreshAllData = async () => {
     setLoading(true);
+    console.log('🔄 Fetching data from:', API_BASE);
     try {
       // Fetch data sequentially to avoid overwhelming the server
-      const dfRes = await fetch(`${API_BASE}/list-datafiles/`).then(r => r.ok ? r.json() : []).catch(() => []);
-      await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
+      console.log('📁 Fetching datafiles...');
+      const dfRes = await fetch(`${API_BASE}/list-datafiles/`)
+        .then(r => {
+          console.log('📁 Datafiles response:', r.status, r.ok);
+          return r.ok ? r.json() : [];
+        })
+        .catch(err => {
+          console.error('📁 Datafiles error:', err);
+          return [];
+        });
+      await new Promise(resolve => setTimeout(resolve, 100));
       
-      const stRes = await fetch(`${API_BASE}/list-strategies/`).then(r => r.ok ? r.json() : []).catch(() => []);
-      await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
+      console.log('📜 Fetching strategies...');
+      const stRes = await fetch(`${API_BASE}/list-strategies/`)
+        .then(r => {
+          console.log('📜 Strategies response:', r.status, r.ok);
+          return r.ok ? r.json() : [];
+        })
+        .catch(err => {
+          console.error('📜 Strategies error:', err);
+          return [];
+        });
+      await new Promise(resolve => setTimeout(resolve, 100));
       
-      const btRes = await fetch(`${API_BASE}/list-backtest-results/`).then(r => r.ok ? r.json() : []).catch(() => []);
+      console.log('📊 Fetching backtests...');
+      const btRes = await fetch(`${API_BASE}/list-backtest-results/`)
+        .then(r => {
+          console.log('📊 Backtests response:', r.status, r.ok);
+          return r.ok ? r.json() : [];
+        })
+        .catch(err => {
+          console.error('📊 Backtests error:', err);
+          return [];
+        });
+      
+      console.log('✅ Data fetched:', { dataFiles: dfRes?.length, strategies: stRes?.length, backtests: btRes?.length || btRes?.results?.length });
       
       setDataFiles(dfRes || []);
       setStrategies(stRes || []);

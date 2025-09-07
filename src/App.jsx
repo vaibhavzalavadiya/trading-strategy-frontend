@@ -7,6 +7,7 @@ import BacktestRunner from './components/BacktestRunner';
 import BacktestHistory from './components/BacktestHistory';
 import StockDataViewer from './components/StockDataViewer';
 import Backtest from './components/Backtest';
+import DebugApi from './components/DebugApi';
 
 const sections = [
   { 
@@ -250,6 +251,7 @@ function App() {
 
         {/* Main content area */}
         <main className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 bg-gray-50">
+          <DebugApi />
           {loading && selected === 4 ? (
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
