@@ -5,7 +5,16 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '.
 import { Button } from './ui/button';
 
 const BacktestRunner = () => {
-  const { strategies, dataFiles, addBacktest, refreshAllData } = useAppData();
+  const { strategies, dataFiles, addBacktest, refreshAllData, loading: contextLoading } = useAppData();
+  
+  // Debug: Log current data
+  useEffect(() => {
+    console.log('BacktestRunner - Data:', { 
+      strategies: strategies.length, 
+      dataFiles: dataFiles.length,
+      contextLoading 
+    });
+  }, [strategies, dataFiles, contextLoading]);
   const [selectedStrategy, setSelectedStrategy] = useState('');
   const [selectedDataFile, setSelectedDataFile] = useState('');
   const [results, setResults] = useState(null);
@@ -18,7 +27,15 @@ const BacktestRunner = () => {
 
   // Refresh data when component mounts
   useEffect(() => {
-    refreshAllData();
+    const loadData = async () => {
+      try {
+        await refreshAllData();
+      } catch (error) {
+        console.error('Failed to load data:', error);
+        setError('Failed to load data from server');
+      }
+    };
+    loadData();
   }, [refreshAllData]);
 
   // Reset selections when data changes
@@ -110,16 +127,24 @@ const BacktestRunner = () => {
   const renderResults = () => {
     if (!results) return null;
     
+    console.log('Rendering results:', results);
+    
     // Ensure we have the required properties
     const safeResults = {
       summary: results.summary || {},
       trades: Array.isArray(results.trades) ? results.trades : [],
       currency: results.currency || '$'
     };
+    
+    console.log('Safe results:', safeResults);
+    console.log('Trades count:', safeResults.trades.length);
+    
     const totalTradePages = Math.ceil(safeResults.trades.length / tradePageSize);
     const tradeStartIndex = (tradePage - 1) * tradePageSize;
     const tradeEndIndex = tradeStartIndex + tradePageSize;
     const currentTrades = safeResults.trades.slice(tradeStartIndex, tradeEndIndex);
+    
+    console.log('Current trades to display:', currentTrades);
     
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -147,23 +172,31 @@ const BacktestRunner = () => {
               </tr>
             </thead>
             <tbody>
-              {currentTrades.map((trade, index) => (
-                <tr key={index} className={trade.profit > 0 ? 'bg-green-50' : trade.profit < 0 ? 'bg-red-50' : ''}>
-                  <td className="px-4 py-2">{trade.date || '-'}</td>
-                  <td className="px-4 py-2">
-                    <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${trade.type === 'BUY' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>{trade.type || '-'}</span>
-                  </td>
-                  <td className="px-4 py-2 text-right">{typeof trade.price === 'number' ? trade.price.toLocaleString() : trade.price || '-'}</td>
-                  <td className="px-4 py-2 text-right">{typeof trade.shares === 'number' ? trade.shares.toLocaleString() : trade.shares || '-'}</td>
-                  <td className="px-4 py-2 text-right font-medium">
-                    {trade.profit !== null && trade.profit !== undefined ? (
-                      <span className={trade.profit > 0 ? 'text-green-600' : 'text-red-600'}>
-                        {trade.profit > 0 ? '+' : ''}{typeof trade.profit === 'number' ? trade.profit.toLocaleString() : trade.profit}
-                      </span>
-                    ) : '-'}
+              {currentTrades.length > 0 ? (
+                currentTrades.map((trade, index) => (
+                  <tr key={index} className={trade.profit > 0 ? 'bg-green-50' : trade.profit < 0 ? 'bg-red-50' : ''}>
+                    <td className="px-4 py-2">{trade.date || '-'}</td>
+                    <td className="px-4 py-2">
+                      <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${trade.type === 'BUY' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>{trade.type || '-'}</span>
+                    </td>
+                    <td className="px-4 py-2 text-right">{typeof trade.price === 'number' ? trade.price.toLocaleString() : trade.price || '-'}</td>
+                    <td className="px-4 py-2 text-right">{typeof trade.shares === 'number' ? trade.shares.toLocaleString() : trade.shares || '-'}</td>
+                    <td className="px-4 py-2 text-right font-medium">
+                      {trade.profit !== null && trade.profit !== undefined ? (
+                        <span className={trade.profit > 0 ? 'text-green-600' : 'text-red-600'}>
+                          {trade.profit > 0 ? '+' : ''}{typeof trade.profit === 'number' ? trade.profit.toLocaleString() : trade.profit}
+                        </span>
+                      ) : '-'}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="px-4 py-8 text-center text-gray-500">
+                    No trade data available in results
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
           {/* Pagination Controls for Trades */}
@@ -273,51 +306,74 @@ const BacktestRunner = () => {
           </div>
         )}
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Strategy Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              1. Select Strategy
-            </label>
-            <select
-              value={selectedStrategy || ''}
-              onChange={(e) => setSelectedStrategy(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-            >
-              <option value="">-- Select Strategy --</option>
-              {strategies.map(s => (
-                <option key={s.id} value={s.id}>{s.name}</option>
-              ))}
-            </select>
-            {strategies.length === 0 && (
-              <p className="text-xs text-gray-500 mt-2">
-                No strategies available. Upload a strategy first.
-              </p>
-            )}
+        {loading && strategies.length === 0 && dataFiles.length === 0 ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <div className="text-gray-600">Loading strategies and data files...</div>
+            </div>
           </div>
-          
-          {/* Data File Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              2. Select Market Data
-            </label>
-            <select
-              value={selectedDataFile || ''}
-              onChange={(e) => setSelectedDataFile(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-            >
-              <option value="">-- Select Data File --</option>
-              {dataFiles.map(f => (
-                <option key={f.id} value={f.id}>{f.name}</option>
-              ))}
-            </select>
-            {dataFiles.length === 0 && (
-              <p className="text-xs text-gray-500 mt-2">
-                No data files available. Upload market data first.
-              </p>
-            )}
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Strategy Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                1. Select Strategy ({strategies.length} available)
+              </label>
+              <select
+                value={selectedStrategy || ''}
+                onChange={(e) => setSelectedStrategy(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+              >
+                <option value="">-- Select Strategy --</option>
+                {strategies.length > 0 ? (
+                  strategies.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))
+                ) : (
+                  <option disabled>No strategies available</option>
+                )}
+              </select>
+              {strategies.length === 0 && (
+                <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                  <p className="text-sm text-yellow-700">
+                    <i className="fas fa-exclamation-triangle mr-2"></i>
+                    No strategies available. Go to "Strategies" section to upload one.
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            {/* Data File Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                2. Select Market Data ({dataFiles.length} available)
+              </label>
+              <select
+                value={selectedDataFile || ''}
+                onChange={(e) => setSelectedDataFile(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+              >
+                <option value="">-- Select Data File --</option>
+                {dataFiles.length > 0 ? (
+                  dataFiles.map(f => (
+                    <option key={f.id} value={f.id}>{f.name}</option>
+                  ))
+                ) : (
+                  <option disabled>No data files available</option>
+                )}
+              </select>
+              {dataFiles.length === 0 && (
+                <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                  <p className="text-sm text-yellow-700">
+                    <i className="fas fa-exclamation-triangle mr-2"></i>
+                    No data files available. Go to "Data Files" section to upload one.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
         
         {/* Run Button */}
         <div className="mt-6">

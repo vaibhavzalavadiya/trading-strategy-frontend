@@ -252,19 +252,10 @@ function App() {
         {/* Main content area */}
         <main className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 bg-gray-50">
           {/* <DebugApi /> */}
-          {loading && selected === 4 ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <div className="text-gray-600">Loading backtest results...</div>
-              </div>
-            </div>
+          {selected === 0 ? (
+            <Dashboard onNavigate={handleNavigate} />
           ) : (
-            selected === 0 ? (
-              <Dashboard onNavigate={handleNavigate} />
-            ) : (
-              sections[selected].component
-            )
+            sections[selected].component
           )}
         </main>
       </div>
