@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Input } from './ui/input';
-import { Button } from './ui/button';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
+import { Input, Button, Select } from './ui/index.jsx';
 import FilterBuilder from './FilterBuilder/FilterBuilder';
 
 const FIELD_OPTIONS = [

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useAppData } from '../context/AppDataContext';
-import { Input } from './ui/input';
-import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from './ui/table';
+import { Input, Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from './ui/index.jsx';
 
 const DataFileManager = () => {
   const { dataFiles, addDataFile, deleteDataFile, updateDataFile, refreshAllData } = useAppData();

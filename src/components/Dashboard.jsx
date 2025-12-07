@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAppData } from '../context/AppDataContext';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from './ui/table';
-import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
-import { Tag } from './ui/tag';
-import { Button } from './ui/button';
+import { Select, Table, TableHeader, TableBody, TableHead, TableRow, TableCell, Card, CardHeader, CardContent, CardTitle, Button, Badge } from './ui/index.jsx';
 
 const Dashboard = ({ onNavigate }) => {
   const { dataFiles, strategies, backtests, activity, refreshBacktests } = useAppData();
@@ -118,7 +114,7 @@ const Dashboard = ({ onNavigate }) => {
               <p className="text-muted-foreground text-lg">Monitor your trading performance and strategy analytics</p>
             </div>
             <div className="flex items-center gap-4 mt-4 sm:mt-0">
-              <Tag className={`px-4 py-2 font-semibold shadow ${statusIndicator.bg} ${statusIndicator.color}`}>{statusIndicator.status}</Tag>
+              <Badge className={`px-4 py-2 font-semibold shadow ${statusIndicator.bg} ${statusIndicator.color}`}>{statusIndicator.status}</Badge>
               <Button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
@@ -180,8 +176,8 @@ const Dashboard = ({ onNavigate }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
         {/* Performance Overview */}
         <Card className="col-span-2 bg-white">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
+          <CardHeader className="">
+            <CardTitle className="text-xl font-semibold text-gray-800 flex items-center gap-2">
             <i className="fas fa-chart-line text-blue-600"></i>
             Performance Overview
             </CardTitle>
@@ -216,7 +212,7 @@ const Dashboard = ({ onNavigate }) => {
         {/* Quick Actions */}
         <Card className="col-span-1 bg-white">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
+            <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
             <i className="fas fa-bolt text-green-600"></i>
             Quick Actions
             </CardTitle>
@@ -235,11 +231,11 @@ const Dashboard = ({ onNavigate }) => {
               <Button
               className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg font-medium transition-colors shadow"
               onClick={() => onNavigate && onNavigate('Strategies')}
-              aria-label="Create Strategy"
-              title="Go to Strategies section to create"
+              aria-label="Upload Strategy"
+              title="Go to Strategies section to upload"
             >
-              <i className="fas fa-scroll mr-2"></i>
-              Create Strategy
+              <i className="fas fa-upload mr-2"></i>
+              Upload Strategy
               </Button>
               <Button
               className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors shadow"
@@ -258,8 +254,8 @@ const Dashboard = ({ onNavigate }) => {
 
         {/* Top Performing Strategies */}
         <Card className="bg-white">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
+          <CardHeader className="">
+            <CardTitle className="text-xl font-semibold text-gray-800 flex items-center gap-2">
             <i className="fas fa-trophy text-yellow-600"></i>
             Top Performing Strategies
             </CardTitle>
@@ -270,16 +266,16 @@ const Dashboard = ({ onNavigate }) => {
               {stats.strategyPerformance.map((strategy, index) => (
                   <Card key={strategy.name} className={`flex items-center justify-between p-4 shadow border ${index === 0 ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-100'}`}>
                   <div className="flex items-center gap-4">
-                      <Tag className={`w-10 h-10 flex items-center justify-center text-white font-bold text-lg shadow ${index === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 'bg-gradient-to-r from-gray-300 to-gray-400'}`}>{index + 1}</Tag>
+                      <Badge className={`w-10 h-10 flex items-center justify-center text-white font-bold text-lg shadow ${index === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' : 'bg-gradient-to-r from-gray-300 to-gray-400'}`}>{index + 1}</Badge>
                     <div>
                       <div className="font-semibold text-gray-800 text-lg">{strategy.name}</div>
                       <div className="text-sm text-gray-500">{strategy.backtestCount} backtests</div>
                     </div>
                   </div>
                   <div className="text-right">
-                      <span className={`font-bold ${getProfitColor(strategy.totalProfit)} text-lg`}><Tag>₹{strategy.totalProfit.toLocaleString()}</Tag></span>
+                      <span className={`font-bold ${getProfitColor(strategy.totalProfit)} text-lg`}><Badge>₹{strategy.totalProfit.toLocaleString()}</Badge></span>
                       <div className="text-sm text-gray-500">
-                        Avg: <Tag>₹{strategy.avgProfit.toLocaleString()}</Tag>
+                        Avg: <Badge>₹{strategy.avgProfit.toLocaleString()}</Badge>
                     </div>
                     </div>
                   </Card>
@@ -297,8 +293,8 @@ const Dashboard = ({ onNavigate }) => {
 
         {/* Recent Activity */}
         <Card className="bg-white">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold text-gray-800 mb-6 flex items-center gap-2">
+          <CardHeader className="">
+            <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
             <i className="fas fa-clock text-blue-600"></i>
             Recent Activity
             </CardTitle>
@@ -308,7 +304,7 @@ const Dashboard = ({ onNavigate }) => {
             {stats.recentActivity.length > 0 ? (
               stats.recentActivity.map((activity, index) => (
                   <Card key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg shadow border border-gray-100">
-                    <Tag className="w-2 h-2 bg-blue-600 rounded-full mt-2 p-0"></Tag>
+                    <Badge className="w-2 h-2 bg-blue-600 rounded-full mt-2 p-0"></Badge>
                   <div className="flex-1">
                     <div className="text-sm font-medium text-gray-800 flex items-center gap-2">
                       <i className="fas fa-bolt text-blue-400"></i>
@@ -334,38 +330,28 @@ const Dashboard = ({ onNavigate }) => {
       <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mt-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2 text-nowrap">
               <i className="fas fa-history text-blue-600"></i>
               Recent Backtests
             </h2>
-            <Select value={selectedTimeframe} onValueChange={value => setSelectedTimeframe(value)}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="Select Timeframe" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7d">Last 7 days</SelectItem>
-                <SelectItem value="30d">Last 30 days</SelectItem>
-                <SelectItem value="all">All time</SelectItem>
-              </SelectContent>
+            <Select value={selectedTimeframe} onChange={(e) => setSelectedTimeframe(e.target.value)} className="w-[150px]">
+              <option value="7d">Last 7 days</option>
+              <option value="30d">Last 30 days</option>
+              <option value="all">All time</option>
             </Select>
           </div>
           <div className="flex items-center gap-2">
-            <label htmlFor="pageSize" className="text-sm text-gray-600">Rows per page:</label>
-            <Select value={pageSize.toString()} onValueChange={value => { setPageSize(Number(value)); setCurrentPage(1); }}>
-              <SelectTrigger className="w-[100px]">
-                <SelectValue placeholder="Rows per page" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="5">5</SelectItem>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="20">20</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-              </SelectContent>
+            <label htmlFor="pageSize" className="text-sm text-gray-600 text-nowrap">Rows per page:</label>
+            <Select value={pageSize.toString()} onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }} className="w-[100px]">
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
             </Select>
           </div>
         </div>
-        <div className="overflow-x-auto max-h-[60vh]">
-          <Table>
+        <div className="overflow-x-auto max-h-[60vh] overflow-y-auto">
+          <Table className="min-w-[700px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Strategy</TableHead>
@@ -389,19 +375,17 @@ const Dashboard = ({ onNavigate }) => {
                 </TableRow>
               ) : (
                 currentBacktests.map((backtest, idx) => (
-                  <TableRow key={backtest.id} className="hover:bg-blue-50 transition-colors group focus-within:bg-blue-100">
+                  <TableRow key={backtest.id} className="hover:bg-blue-50 transition-colors">
                     <TableCell>
                       <div className="flex items-center">
                         <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                          <i className="fas fa-scroll text-blue-600 text-sm" title="Strategy"></i>
+                          <i className="fas fa-scroll text-blue-600 text-sm"></i>
                         </div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{backtest.strategy}</div>
-                        </div>
+                        <div className="text-sm font-medium text-gray-900">{backtest.strategy}</div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm text-gray-500" title={backtest.datafile}>{backtest.datafile}</div>
+                      <div className="text-sm text-gray-500">{backtest.datafile}</div>
                     </TableCell>
                     <TableCell>
                       <div className="text-sm font-medium text-gray-900">
@@ -409,7 +393,7 @@ const Dashboard = ({ onNavigate }) => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className={`text-sm font-bold ${getProfitColor(backtest.result?.summary?.total_profit || 0)}`} title="Total Profit/Loss">
+                      <span className={`text-sm font-bold ${getProfitColor(backtest.result?.summary?.total_profit || 0)}`}>
                         {backtest.result?.summary?.total_profit !== undefined
                           ? `₹${backtest.result.summary.total_profit.toLocaleString()}`
                           : '--'}
@@ -420,7 +404,7 @@ const Dashboard = ({ onNavigate }) => {
                         <div className="text-sm font-medium text-gray-900 mr-2">
                           {backtest.result?.summary?.win_rate || 0}%
                         </div>
-                        <div className="w-16 bg-gray-200 rounded-full h-2" title="Win Rate">
+                        <div className="w-16 bg-gray-200 rounded-full h-2">
                           <div
                             className="bg-green-600 h-2 rounded-full"
                             style={{ width: `${backtest.result?.summary?.win_rate || 0}%` }}

@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
+import { Select } from './ui/index.jsx';
 
 const StrategyUploader = () => {
   const [file, setFile] = useState(null);

@@ -210,40 +210,52 @@ function App() {
       {/* Main content */}
       <div className="flex-1 flex flex-col ml-0 sm:ml-72 min-h-screen">
         {/* Topbar */}
-        <header className="sticky top-0 z-10 bg-white border-b border-gray-200 flex items-center h-16 px-4 sm:px-6">
+        <header className="sticky top-0 z-10 bg-white border-b border-gray-200 flex items-center py-2 px-4 sm:px-6">
           <button className="sm:hidden mr-3 p-2 rounded-lg hover:bg-gray-100" onClick={handleDrawerToggle}>
             <i className="fas fa-bars text-gray-600"></i>
           </button>
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 flex-1">
+          <div className="flex items-center gap-2 flex-1 flex-wrap">
             <h1 className="text-lg font-semibold text-gray-800">{sections[selected].label}</h1>
-            <span className="text-gray-400">•</span>
-            <span className="text-sm text-gray-500">{sections[selected].description}</span>
+            <span className="text-gray-400 sm:block hidden">•</span>
+            <span className="text-sm text-gray-500 sm:block hidden">{sections[selected].description}</span>
           </div>
           {/* Quick Actions */}
           <div className="flex items-center gap-2">
             {selected === 0 && (
-              <button className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
+              <button 
+                onClick={() => handleNavigate('Run Backtest')}
+                className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+              >
                 <i className="fas fa-plus mr-1"></i>
                 New Backtest
               </button>
             )}
-            {selected === 1 && (
-              <button className="px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors">
+            {selected === 2 && (
+              <button 
+                onClick={() => handleNavigate('Data Files')}
+                className="px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
+              >
                 <i className="fas fa-upload mr-1"></i>
                 Upload Data
               </button>
             )}
-            {selected === 2 && (
-              <button className="px-3 py-1.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors">
+            {selected === 3 && (
+              <button 
+                onClick={() => handleNavigate('Strategies')}
+                className="px-3 py-1.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors"
+              >
                 <i className="fas fa-upload mr-1"></i>
                 Upload Strategy
               </button>
             )}
-            {selected === 4 && (
-              <button className="px-3 py-1.5 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition-colors">
-                <i className="fas fa-sync-alt mr-1"></i>
-                Refresh Results
+            {selected === 5 && (
+              <button 
+                onClick={() => handleNavigate('Run Backtest')}
+                className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <i className="fas fa-plus mr-1"></i>
+                New Backtest
               </button>
             )}
           </div>
@@ -254,6 +266,8 @@ function App() {
           {/* <DebugApi /> */}
           {selected === 0 ? (
             <Dashboard onNavigate={handleNavigate} />
+          ) : selected === 5 ? (
+            <BacktestHistory onNavigate={handleNavigate} />
           ) : (
             sections[selected].component
           )}

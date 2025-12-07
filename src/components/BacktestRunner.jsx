@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAppData } from '../context/AppDataContext';
 import StrategyManager from './StrategyManager';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
-import { Button } from './ui/button';
+import { Select, Button } from './ui/index.jsx';
+
+const getCurrencySymbol = (fileName) => {
+  return fileName && fileName.toLowerCase().includes('.ns') ? '₹' : '$';
+};
 
 const BacktestRunner = () => {
   const { strategies, dataFiles, addBacktest, refreshAllData, loading: contextLoading } = useAppData();
@@ -104,11 +107,14 @@ const BacktestRunner = () => {
       }
       
       if (backendResult && backendResult.result) {
+        const selectedFile = dataFiles.find(f => f.id === datafile_id);
+        const currency = getCurrencySymbol(selectedFile?.name);
+        
         setResults({
           ...backendResult.result,
           summary: backendResult.result.summary || {},
           trades: backendResult.result.trades || [],
-          currency: backendResult.result.currency || '$',
+          currency: currency,
         });
         setSuccess('Backtest completed successfully!');
         await refreshAllData();
@@ -147,7 +153,7 @@ const BacktestRunner = () => {
     console.log('Current trades to display:', currentTrades);
     
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-lg border border-gray-200 lg:p-6 p-4">
         <div className="flex items-center gap-2 mb-6">
           <i className="fas fa-chart-line text-gray-500"></i>
           <h2 className="text-lg font-semibold text-gray-900">Results</h2>
@@ -166,9 +172,9 @@ const BacktestRunner = () => {
               <tr>
                 <th className="px-4 py-2 text-left">Date</th>
                 <th className="px-4 py-2 text-left">Type</th>
-                <th className="px-4 py-2 text-right">Price ({safeResults.currency})</th>
+                <th className="px-4 py-2 text-right">Price</th>
                 <th className="px-4 py-2 text-right">Shares</th>
-                <th className="px-4 py-2 text-right">Profit/Loss ({safeResults.currency})</th>
+                <th className="px-4 py-2 text-right">Profit/Loss</th>
               </tr>
             </thead>
             <tbody>
@@ -179,12 +185,12 @@ const BacktestRunner = () => {
                     <td className="px-4 py-2">
                       <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${trade.type === 'BUY' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>{trade.type || '-'}</span>
                     </td>
-                    <td className="px-4 py-2 text-right">{typeof trade.price === 'number' ? trade.price.toLocaleString() : trade.price || '-'}</td>
+                    <td className="px-4 py-2 text-right">{safeResults.currency}{typeof trade.price === 'number' ? trade.price.toLocaleString() : trade.price || '-'}</td>
                     <td className="px-4 py-2 text-right">{typeof trade.shares === 'number' ? trade.shares.toLocaleString() : trade.shares || '-'}</td>
                     <td className="px-4 py-2 text-right font-medium">
                       {trade.profit !== null && trade.profit !== undefined ? (
                         <span className={trade.profit > 0 ? 'text-green-600' : 'text-red-600'}>
-                          {trade.profit > 0 ? '+' : ''}{typeof trade.profit === 'number' ? trade.profit.toLocaleString() : trade.profit}
+                          {trade.profit > 0 ? '+' : ''}{safeResults.currency}{typeof trade.profit === 'number' ? trade.profit.toLocaleString() : trade.profit}
                         </span>
                       ) : '-'}
                     </td>
@@ -263,9 +269,9 @@ const BacktestRunner = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 pb-6">
+      <div className="bg-white rounded-lg border border-gray-200 lg:p-6 p-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">Backtest</h1>
@@ -283,7 +289,7 @@ const BacktestRunner = () => {
       </div>
 
       {/* Configuration */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-lg border border-gray-200 lg:p-6 p-4">
         <h2 className="text-lg font-semibold text-gray-900 mb-6">Configuration</h2>
         
         {error && (

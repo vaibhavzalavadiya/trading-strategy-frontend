@@ -1,6 +1,5 @@
 import React from "react";
-import { Input } from "../ui/input";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../ui/select";
+import { Input, Select } from "../ui/index.jsx";
 import { numericIndicators, paramIndicators, operators, joiners, paramIndicatorMeta } from "./constants";
 
 function getParamMeta(type) {

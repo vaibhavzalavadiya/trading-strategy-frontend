@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useAppData } from '../context/AppDataContext';
-import { Input } from './ui/input';
-import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from './ui/table';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
+import { Input, Table, TableHeader, TableBody, TableHead, TableRow, TableCell, Select } from './ui/index.jsx';
 
 const StrategyManager = () => {
   const { strategies, addStrategy, deleteStrategy, updateStrategy, refreshAllData } = useAppData();

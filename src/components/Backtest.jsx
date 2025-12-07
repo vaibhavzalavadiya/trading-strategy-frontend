@@ -14,6 +14,10 @@ const defaultCondition = () => ({
   joiner: 'AND',
 });
 
+const getCurrencySymbol = (fileName) => {
+  return fileName && fileName.toLowerCase().includes('.ns') ? '₹' : '$';
+};
+
 const Backtest = () => {
   const { dataFiles, refreshAllData } = useAppData();
   const [conditions, setConditions] = useState([defaultCondition()]);
@@ -151,7 +155,7 @@ const Backtest = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h1 className="text-2xl font-semibold text-gray-900 mb-6">Custom Backtest Builder</h1>
         
@@ -271,12 +275,12 @@ const Backtest = () => {
                             {trade.type}
                           </span>
                         </td>
-                        <td className="px-4 py-2 text-right">${trade.price.toFixed(2)}</td>
+                        <td className="px-4 py-2 text-right">{results.currency}{trade.price.toFixed(2)}</td>
                         <td className="px-4 py-2 text-right">{trade.shares}</td>
                         <td className="px-4 py-2 text-right">
                           {trade.profit !== null ? (
                             <span className={trade.profit > 0 ? 'text-green-600' : 'text-red-600'}>
-                              {trade.profit > 0 ? '+' : ''}${trade.profit.toFixed(2)}
+                              {trade.profit > 0 ? '+' : ''}{results.currency}{trade.profit.toFixed(2)}
                             </span>
                           ) : '-'}
                         </td>

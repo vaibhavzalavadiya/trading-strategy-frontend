@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAppData } from '../context/AppDataContext';
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from './ui/table';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from './ui/index.jsx';
 
-const BacktestHistory = () => {
+const getCurrencySymbol = (fileName) => {
+  return fileName && fileName.toLowerCase().includes('.ns') ? '₹' : '$';
+};
+
+const BacktestHistory = ({ onNavigate }) => {
   const { backtests, deleteBacktest, refreshBacktests, strategies, dataFiles } = useAppData();
   const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(null);
@@ -148,7 +152,7 @@ const BacktestHistory = () => {
       console.warn('Invalid trades data:', trades);
       return <div className="text-gray-500 text-sm">No trade data available</div>;
     }
-    const currencySymbol = currency === 'INR' ? '₹' : '$';
+    const currencySymbol = currency || '$';
     const totalTradePages = Math.ceil(trades.length / tradePageSize);
     const tradeStartIndex = (tradePage - 1) * tradePageSize;
     const tradeEndIndex = tradeStartIndex + tradePageSize;
@@ -160,9 +164,9 @@ const BacktestHistory = () => {
             <TableRow>
               <TableHead>Date</TableHead>
               <TableHead>Type</TableHead>
-              <TableHead className="text-right">Price ({currencySymbol})</TableHead>
+              <TableHead className="text-right">Price</TableHead>
               <TableHead className="text-right">Shares</TableHead>
-              <TableHead className="text-right">Profit/Loss ({currencySymbol})</TableHead>
+              <TableHead className="text-right">Profit/Loss</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -172,12 +176,12 @@ const BacktestHistory = () => {
                 <TableCell>
                   <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${trade.type === 'BUY' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>{trade.type || '-'}</span>
                 </TableCell>
-                <TableCell className="text-right">{typeof trade.price === 'number' ? trade.price.toLocaleString() : trade.price || '-'}</TableCell>
+                <TableCell className="text-right">{currencySymbol}{typeof trade.price === 'number' ? trade.price.toLocaleString() : trade.price || '-'}</TableCell>
                 <TableCell className="text-right">{typeof trade.shares === 'number' ? trade.shares.toLocaleString() : trade.shares || '-'}</TableCell>
                 <TableCell className="text-right font-medium">
                   {trade.profit !== null && trade.profit !== undefined ? (
                     <span className={trade.profit > 0 ? 'text-green-600' : 'text-red-600'}>
-                      {trade.profit > 0 ? '+' : ''}{typeof trade.profit === 'number' ? trade.profit.toLocaleString() : trade.profit}
+                      {trade.profit > 0 ? '+' : ''}{currencySymbol}{typeof trade.profit === 'number' ? trade.profit.toLocaleString() : trade.profit}
                     </span>
                   ) : '-'}
                 </TableCell>
@@ -313,7 +317,7 @@ const BacktestHistory = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="max-w-7xl mx-auto">
       {/* Header */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -323,13 +327,22 @@ const BacktestHistory = () => {
               {filteredBacktests.length} of {backtests.length} results
             </p>
           </div>
-          <button
-            onClick={refreshBacktests}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-            title="Refresh results"
-          >
-            <i className="fas fa-sync-alt text-sm"></i>
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => onNavigate ? onNavigate('Run Backtest') : window.location.href = '#run-backtest'}
+              className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-1"
+            >
+              <i className="fas fa-plus"></i>
+              New Backtest
+            </button>
+            <button
+              onClick={refreshBacktests}
+              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+              title="Refresh results"
+            >
+              <i className="fas fa-sync-alt text-sm"></i>
+            </button>
+          </div>
         </div>
       </div>
       
